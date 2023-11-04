@@ -53,21 +53,53 @@ create_function(Uri, Range0, _Data, [UndefinedFun]) ->
 -spec export_function(uri(), range(), binary(), [binary()]) -> [map()].
 export_function(Uri, _Range, _Data, [UnusedFun]) ->
     {ok, Document} = els_utils:lookup_document(Uri),
-    case els_poi:sort(els_dt_document:pois(Document, [module, export])) of
-        [] ->
-            [];
-        POIs ->
-            #{range := #{to := {Line, _Col}}} = lists:last(POIs),
-            Pos = {Line + 1, 1},
+    POIs = els_dt_document:pois(Document, [module, export_entry]),
+    case els_poi:sort(POIs) of
+        [#{kind := module, range := #{to := {Line, _Col}}} | []] ->
+            %% module definition is present but no exported funs
             [
                 make_edit_action(
                     Uri,
-                    <<"Export ", UnusedFun/binary>>,
+                    <<"Export ", UnusedFun/binary, " with new export">>,
                     ?CODE_ACTION_KIND_QUICKFIX,
                     <<"-export([", UnusedFun/binary, "]).\n">>,
-                    els_protocol:range(#{from => Pos, to => Pos})
+                    els_protocol:range(#{
+                        from => {Line + 1, 1},
+                        to => {Line + 1, 1}
+                    })
                 )
-            ]
+            ];
+        [#{kind := module} | ExportEntries] ->
+            %% export is already present in some shape or form
+            %% pick the last defined exported funs in the export attribute
+            %% and either append the fun to be exported or create a new
+            %% export attibute with the function depending on the users choice
+            #{range := #{to := {Line, Col}}} = lists:last(ExportEntries),
+            [
+                make_edit_action(
+                    Uri,
+                    <<"Add ", UnusedFun/binary, " to existing export">>,
+                    ?CODE_ACTION_KIND_QUICKFIX,
+                    <<", ", UnusedFun/binary>>,
+                    els_protocol:range(#{
+                        from => {Line, Col},
+                        to => {Line, Col}
+                    })
+                ),
+                make_edit_action(
+                    Uri,
+                    <<"Export ", UnusedFun/binary, " with new export">>,
+                    ?CODE_ACTION_KIND_QUICKFIX,
+                    <<"-export([", UnusedFun/binary, "]).\n">>,
+                    els_protocol:range(#{
+                        from => {Line + 1, 1},
+                        to => {Line + 1, 1}
+                    })
+                )
+            ];
+        _Else ->
+            %% neither module definion nor exported funs
+            []
     end.
 
 -spec ignore_variable(uri(), range(), binary(), [binary()]) -> [map()].

@@ -130,6 +130,32 @@ export_unused_function(Config) ->
                                         range =>
                                             #{
                                                 'end' => #{
+                                                    character => 35,
+                                                    line => ?COMMENTS_LINES + 2
+                                                },
+                                                start => #{
+                                                    character => 35,
+                                                    line => ?COMMENTS_LINES + 2
+                                                }
+                                            },
+                                        newText => <<", function_c/0">>
+                                    }
+                                ]
+                        }
+                },
+                kind => <<"quickfix">>,
+                title => <<"Add function_c/0 to existing export">>
+            },
+            #{
+                edit => #{
+                    changes =>
+                        #{
+                            binary_to_atom(Uri, utf8) =>
+                                [
+                                    #{
+                                        range =>
+                                            #{
+                                                'end' => #{
                                                     character => 0,
                                                     line => ?COMMENTS_LINES + 3
                                                 },
@@ -144,7 +170,7 @@ export_unused_function(Config) ->
                         }
                 },
                 kind => <<"quickfix">>,
-                title => <<"Export function_c/0">>
+                title => <<"Export function_c/0 with new export">>
             }
         ],
     ?assertEqual(Expected, Result),
