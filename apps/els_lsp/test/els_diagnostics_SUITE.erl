@@ -685,7 +685,7 @@ epp_predefined_macros_in_hrl(_Config) ->
     Path = include_path("predefined_macros.hrl"),
     Source = <<"Compiler">>,
     %% should generate no errors, warnings or hints
-    els_test:run_diagnostics_test(Path, Source, [s], [], []).
+    els_test:run_diagnostics_test(Path, Source, [], [], []).
 
 -spec epp_with_nonexistent_macro(config()) -> ok.
 epp_with_nonexistent_macro(_Config) ->
