@@ -31,6 +31,7 @@
     use_long_names/1,
     use_long_names_no_domain/1,
     use_long_names_custom_hostname/1,
+    epp_predefined_macros_in_hrl/1,
     epp_with_nonexistent_macro/1,
     elvis/1,
     escript/1,
@@ -679,6 +680,13 @@ use_long_names_custom_hostname(_Config) ->
     ?assertMatch(Node, els_config_runtime:get_node_name()),
     ok.
 
+-spec epp_predefined_macros_in_hrl(config()) -> ok.
+epp_predefined_macros_in_hrl(_Config) ->
+    Path = include_path("predefined_macros.hrl"),
+    Source = <<"Compiler">>,
+    %% should generate no errors, warnings or hints
+    els_test:run_diagnostics_test(Path, Source, [s], [], []).
+
 -spec epp_with_nonexistent_macro(config()) -> ok.
 epp_with_nonexistent_macro(_Config) ->
     Path = include_path("nonexistent_macro.hrl"),
@@ -688,11 +696,6 @@ epp_with_nonexistent_macro(_Config) ->
             code => <<"E1516">>,
             message => <<"can't find include file \"nonexisten-file.hrl\"">>,
             range => {{2, 0}, {3, 0}}
-        },
-        #{
-            code => <<"E1507">>,
-            message => <<"undefined macro 'MODULE'">>,
-            range => {{4, 0}, {5, 0}}
         },
         #{
             code => <<"E1522">>,

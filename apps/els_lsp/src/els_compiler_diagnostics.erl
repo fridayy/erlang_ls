@@ -111,7 +111,10 @@ parse(Uri) ->
         end,
     {ok, Epp} = epp:open([
         {name, FileName},
-        {includes, els_config:get(include_paths)}
+        {includes, els_config:get(include_paths)},
+        %% suppresses E1507 (undefined) for MODULE and MODULE_STRING
+        {macros, [{'MODULE', true, redefine},
+                  {'MODULE_STRING', true, redefine}]}
     ]),
     Res = [
         epp_diagnostic(Document, Anno, Module, Desc)
