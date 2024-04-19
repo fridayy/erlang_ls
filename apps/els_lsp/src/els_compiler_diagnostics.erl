@@ -29,6 +29,9 @@
 ]).
 
 -if(?OTP_RELEASE < 24).
+%% suppress dialyer "no local return" for OTP < 24 as the macro type def is
+%% missing 'redefine'
+%% see: https://github.com/erlang/otp/blob/maint-23/lib/stdlib/src/epp.erl#L37
 -dialyzer({no_return, parse/1}).
 -endif.
 
